@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+    h1 {
+      color: #333;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      margin: 20px 0;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border: 2px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .cell:hover {
+      background-color: #f0f0f0;
+    }
+    #status {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #444;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic Tac Toe</h1>
+  <div id="status">Your turn (X)</div>
+  <div class="board" id="board">
+    <div class="cell" data-index="0"></div>
+    <div class="cell" data-index="1"></div>
+    <div class="cell" data-index="2"></div>
+    <div class="cell" data-index="3"></div>
+    <div class="cell" data-index="4"></div>
+    <div class="cell" data-index="5"></div>
+    <div class="cell" data-index="6"></div>
+    <div class="cell" data-index="7"></div>
+    <div class="cell" data-index="8"></div>
+  </div>
+  <button id="restart">Restart Game</button>
+
+  <script>
+    const board = document.getElementById("board");
+    const cells = document.querySelectorAll(".cell");
+    const status = document.getElementById("status");
+    const restartBtn = document.getElementById("restart");
+
+    let currentTurn = "X"; // Player is X, Computer is O
+    let gameState = ["", "", "", "", "", "", "", "", ""];
+
+    const winPatterns = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+      [0, 4, 8], [2, 4, 6]             // diagonals
+    ];
+
+    // Handle player move
+    function handleCellClick(e) {
+      const cell = e.target;
+      const index = parseInt(cell.getAttribute("data-index"));
+
+      if (gameState[index] !== "" || currentTurn !== "X") return;
+
+      gameState[index] = "X";
+      cell.textContent = "X";
+
+      if (checkWin("X")) {
+        status.textContent = "You Win! 🎉";
+        currentTurn = null;
+        return;
+      }
+
+      if (isDraw()) {
+        status.textContent = "It's a Draw!";
+        currentTurn = null;
+        return;
+      }
+
+      currentTurn = "O";
+      setTimeout(computerMove, 500); // Slight delay for realism
+    }
+
+    // Computer makes a random valid move
+    function computerMove() {
+      const emptyIndices = gameState
+        .map((cell, index) => (cell === "" ? index : null))
+        .filter(val => val !== null);
+
+      if (emptyIndices.length === 0) return;
+
+      const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      gameState[randomIndex] = "O";
+      cells[randomIndex].textContent = "O";
+
+      if (checkWin("O")) {
+        status.textContent = "Computer Wins!";
+        currentTurn = null;
+        return;
+      }
+
+      if (isDraw()) {
+        status.textContent = "It's a Draw!";
+        currentTurn = null;
+        return;
+      }
+
+      currentTurn = "X";
+      status.textContent = "Your turn (X)";
+    }
+
+    // Check for win
+    function checkWin(player) {
+      return winPatterns.some(pattern => {
+        return pattern.every(index => gameState[index] === player);
+      });
+    }
+
+    // Check for draw
+    function isDraw() {
+      return gameState.every(cell => cell !== "");
+    }
+
+    // Restart game
+    function restartGame() {
+      gameState = ["", "", "", "", "", "", "", "", ""];
+      currentTurn = "X";
+      status.textContent = "Your turn (X)";
+      cells.forEach(cell => {
+        cell.textContent = "";
+      });
+    }
+
+    // Event listeners
+    cells.forEach(cell => {
+      cell.addEventListener("click", handleCellClick);
+    });
+    restartBtn.addEventListener("click", restartGame);
+  </script>
+</body>
+</html>
