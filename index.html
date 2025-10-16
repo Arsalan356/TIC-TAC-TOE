@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tic Tac Toe</title>
+  <title>Tic Tac Toe (Unbeatable AI)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -59,7 +59,7 @@
   </style>
 </head>
 <body>
-  <h1>Tic Tac Toe</h1>
+  <h1>Tic Tac Toe (Unbeatable AI)</h1>
   <div id="status">Your turn (X)</div>
   <div class="board" id="board">
     <div class="cell" data-index="0"></div>
@@ -75,21 +75,25 @@
   <button id="restart">Restart Game</button>
 
   <script>
-    const board = document.getElementById("board");
     const cells = document.querySelectorAll(".cell");
     const status = document.getElementById("status");
     const restartBtn = document.getElementById("restart");
 
-    let currentTurn = "X"; // Player is X, Computer is O
+    let currentTurn = "X"; // Player always X
     let gameState = ["", "", "", "", "", "", "", "", ""];
-
     const winPatterns = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-      [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-      [0, 4, 8], [2, 4, 6]             // diagonals
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
     ];
 
-    // Handle player move
+    // Player move
+    cells.forEach(cell => {
+      cell.addEventListener("click", handleCellClick);
+    });
+
+    restartBtn.addEventListener("click", restartGame);
+
     function handleCellClick(e) {
       const cell = e.target;
       const index = parseInt(cell.getAttribute("data-index"));
@@ -99,41 +103,35 @@
       gameState[index] = "X";
       cell.textContent = "X";
 
-      if (checkWin("X")) {
+      if (checkWin(gameState, "X")) {
         status.textContent = "You Win! 🎉";
         currentTurn = null;
         return;
       }
 
-      if (isDraw()) {
+      if (isDraw(gameState)) {
         status.textContent = "It's a Draw!";
         currentTurn = null;
         return;
       }
 
       currentTurn = "O";
-      setTimeout(computerMove, 500); // Slight delay for realism
+      computerMove();
     }
 
-    // Computer makes a random valid move
+    // Unbeatable AI (Minimax Algorithm)
     function computerMove() {
-      const emptyIndices = gameState
-        .map((cell, index) => (cell === "" ? index : null))
-        .filter(val => val !== null);
+      const bestMove = findBestMove(gameState);
+      gameState[bestMove] = "O";
+      cells[bestMove].textContent = "O";
 
-      if (emptyIndices.length === 0) return;
-
-      const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-      gameState[randomIndex] = "O";
-      cells[randomIndex].textContent = "O";
-
-      if (checkWin("O")) {
-        status.textContent = "Computer Wins!";
+      if (checkWin(gameState, "O")) {
+        status.textContent = "Computer Wins 😎";
         currentTurn = null;
         return;
       }
 
-      if (isDraw()) {
+      if (isDraw(gameState)) {
         status.textContent = "It's a Draw!";
         currentTurn = null;
         return;
@@ -143,33 +141,69 @@
       status.textContent = "Your turn (X)";
     }
 
-    // Check for win
-    function checkWin(player) {
-      return winPatterns.some(pattern => {
-        return pattern.every(index => gameState[index] === player);
-      });
+    function findBestMove(board) {
+      let bestScore = -Infinity;
+      let move;
+      for (let i = 0; i < 9; i++) {
+        if (board[i] === "") {
+          board[i] = "O";
+          let score = minimax(board, 0, false);
+          board[i] = "";
+          if (score > bestScore) {
+            bestScore = score;
+            move = i;
+          }
+        }
+      }
+      return move;
     }
 
-    // Check for draw
-    function isDraw() {
-      return gameState.every(cell => cell !== "");
+    function minimax(board, depth, isMaximizing) {
+      if (checkWin(board, "O")) return 10 - depth;
+      if (checkWin(board, "X")) return depth - 10;
+      if (isDraw(board)) return 0;
+
+      if (isMaximizing) {
+        let bestScore = -Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (board[i] === "") {
+            board[i] = "O";
+            let score = minimax(board, depth + 1, false);
+            board[i] = "";
+            bestScore = Math.max(score, bestScore);
+          }
+        }
+        return bestScore;
+      } else {
+        let bestScore = Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (board[i] === "") {
+            board[i] = "X";
+            let score = minimax(board, depth + 1, true);
+            board[i] = "";
+            bestScore = Math.min(score, bestScore);
+          }
+        }
+        return bestScore;
+      }
     }
 
-    // Restart game
+    function checkWin(board, player) {
+      return winPatterns.some(pattern =>
+        pattern.every(index => board[index] === player)
+      );
+    }
+
+    function isDraw(board) {
+      return board.every(cell => cell !== "");
+    }
+
     function restartGame() {
       gameState = ["", "", "", "", "", "", "", "", ""];
       currentTurn = "X";
       status.textContent = "Your turn (X)";
-      cells.forEach(cell => {
-        cell.textContent = "";
-      });
+      cells.forEach(cell => cell.textContent = "");
     }
-
-    // Event listeners
-    cells.forEach(cell => {
-      cell.addEventListener("click", handleCellClick);
-    });
-    restartBtn.addEventListener("click", restartGame);
   </script>
 </body>
 </html>
