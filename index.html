@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tic Tac Toe (Unbeatable AI)</title>
+  <title>Tic Tac Toe (Unbeatable AI + Sound)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -59,7 +59,7 @@
   </style>
 </head>
 <body>
-  <h1>Tic Tac Toe (Unbeatable AI)</h1>
+  <h1>Tic Tac Toe (Unbeatable AI + Sound)</h1>
   <div id="status">Your turn (X)</div>
   <div class="board" id="board">
     <div class="cell" data-index="0"></div>
@@ -74,10 +74,19 @@
   </div>
   <button id="restart">Restart Game</button>
 
+  <!-- Audio elements for sound effects -->
+  <audio id="winSound" src="win.mp3" preload="auto"></audio>
+  <audio id="loseSound" src="lose.mp3" preload="auto"></audio>
+  <audio id="drawSound" src="draw.mp3" preload="auto"></audio>
+
   <script>
     const cells = document.querySelectorAll(".cell");
     const status = document.getElementById("status");
     const restartBtn = document.getElementById("restart");
+
+    const winSound = document.getElementById("winSound");
+    const loseSound = document.getElementById("loseSound");
+    const drawSound = document.getElementById("drawSound");
 
     let currentTurn = "X"; // Player always X
     let gameState = ["", "", "", "", "", "", "", "", ""];
@@ -87,7 +96,7 @@
       [0, 4, 8], [2, 4, 6]
     ];
 
-    // Player move
+    // Event listeners for player moves and restart
     cells.forEach(cell => {
       cell.addEventListener("click", handleCellClick);
     });
@@ -105,21 +114,22 @@
 
       if (checkWin(gameState, "X")) {
         status.textContent = "You Win! 🎉";
+        winSound.play();
         currentTurn = null;
         return;
       }
 
       if (isDraw(gameState)) {
         status.textContent = "It's a Draw!";
+        drawSound.play();
         currentTurn = null;
         return;
       }
 
       currentTurn = "O";
-      computerMove();
+      setTimeout(computerMove, 350);
     }
 
-    // Unbeatable AI (Minimax Algorithm)
     function computerMove() {
       const bestMove = findBestMove(gameState);
       gameState[bestMove] = "O";
@@ -127,12 +137,14 @@
 
       if (checkWin(gameState, "O")) {
         status.textContent = "Computer Wins 😎";
+        loseSound.play();
         currentTurn = null;
         return;
       }
 
       if (isDraw(gameState)) {
         status.textContent = "It's a Draw!";
+        drawSound.play();
         currentTurn = null;
         return;
       }
