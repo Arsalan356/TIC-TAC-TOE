@@ -13,7 +13,7 @@
       justify-content: center;
       height: 100vh;
       margin: 0;
-      background-color: #f4f4f9;
+      background-color: #a9f1e4;
     }
     h1 {
       color: #333;
@@ -59,8 +59,8 @@
   </style>
 </head>
 <body>
-  <h1>Tic Tac Toe </h1>
-  <div id="status">Your turn (X)</div>
+  <h1>Tic Tac Toe</h1>
+  <div id="status">Player X's turn</div>
   <div class="board" id="board">
     <div class="cell" data-index="0"></div>
     <div class="cell" data-index="1"></div>
@@ -74,7 +74,6 @@
   </div>
   <button id="restart">Restart Game</button>
 
-  <!-- Audio elements for sound effects -->
   <audio id="winSound" src="win.mp3" preload="auto"></audio>
   <audio id="loseSound" src="lose.mp3" preload="auto"></audio>
   <audio id="drawSound" src="draw.mp3" preload="auto"></audio>
@@ -88,7 +87,7 @@
     const loseSound = document.getElementById("loseSound");
     const drawSound = document.getElementById("drawSound");
 
-    let currentTurn = "X"; // Player always X
+    let currentTurn = "X";
     let gameState = ["", "", "", "", "", "", "", "", ""];
     const winPatterns = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -96,7 +95,6 @@
       [0, 4, 8], [2, 4, 6]
     ];
 
-    // Event listeners for player moves and restart
     cells.forEach(cell => {
       cell.addEventListener("click", handleCellClick);
     });
@@ -107,14 +105,14 @@
       const cell = e.target;
       const index = parseInt(cell.getAttribute("data-index"));
 
-      if (gameState[index] !== "" || currentTurn !== "X") return;
+      if (gameState[index] !== "" || currentTurn === null) return;
 
-      gameState[index] = "X";
-      cell.textContent = "X";
+      gameState[index] = currentTurn;
+      cell.textContent = currentTurn;
 
-      if (checkWin(gameState, "X")) {
-        status.textContent = "You Win! 🎉";
-        winSound.play();
+      if (checkWin(gameState, currentTurn)) {
+        status.textContent = `Player ${currentTurn} Wins! 🎉`;
+        currentTurn === "X" ? winSound.play() : loseSound.play();
         currentTurn = null;
         return;
       }
@@ -126,78 +124,8 @@
         return;
       }
 
-      currentTurn = "O";
-      setTimeout(computerMove, 350);
-    }
-
-    function computerMove() {
-      const bestMove = findBestMove(gameState);
-      gameState[bestMove] = "O";
-      cells[bestMove].textContent = "O";
-
-      if (checkWin(gameState, "O")) {
-        status.textContent = "Computer Wins 😎";
-        loseSound.play();
-        currentTurn = null;
-        return;
-      }
-
-      if (isDraw(gameState)) {
-        status.textContent = "It's a Draw!";
-        drawSound.play();
-        currentTurn = null;
-        return;
-      }
-
-      currentTurn = "X";
-      status.textContent = "Your turn (X)";
-    }
-
-    function findBestMove(board) {
-      let bestScore = -Infinity;
-      let move;
-      for (let i = 0; i < 9; i++) {
-        if (board[i] === "") {
-          board[i] = "O";
-          let score = minimax(board, 0, false);
-          board[i] = "";
-          if (score > bestScore) {
-            bestScore = score;
-            move = i;
-          }
-        }
-      }
-      return move;
-    }
-
-    function minimax(board, depth, isMaximizing) {
-      if (checkWin(board, "O")) return 10 - depth;
-      if (checkWin(board, "X")) return depth - 10;
-      if (isDraw(board)) return 0;
-
-      if (isMaximizing) {
-        let bestScore = -Infinity;
-        for (let i = 0; i < 9; i++) {
-          if (board[i] === "") {
-            board[i] = "O";
-            let score = minimax(board, depth + 1, false);
-            board[i] = "";
-            bestScore = Math.max(score, bestScore);
-          }
-        }
-        return bestScore;
-      } else {
-        let bestScore = Infinity;
-        for (let i = 0; i < 9; i++) {
-          if (board[i] === "") {
-            board[i] = "X";
-            let score = minimax(board, depth + 1, true);
-            board[i] = "";
-            bestScore = Math.min(score, bestScore);
-          }
-        }
-        return bestScore;
-      }
+      currentTurn = currentTurn === "X" ? "O" : "X";
+      status.textContent = `Player ${currentTurn}'s turn`;
     }
 
     function checkWin(board, player) {
@@ -213,7 +141,7 @@
     function restartGame() {
       gameState = ["", "", "", "", "", "", "", "", ""];
       currentTurn = "X";
-      status.textContent = "Your turn (X)";
+      status.textContent = "Player X's turn";
       cells.forEach(cell => cell.textContent = "");
     }
   </script>
